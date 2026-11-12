@@ -24,6 +24,12 @@ export async function getProfile(userId: string): Promise<Profile> {
 }
 
 export async function updateUsername(userId: string, username: string): Promise<void> {
-  const { error } = await supabase.from('profiles').update({ username }).eq('id', userId);
+  const value = username.trim();
+  if (!value) throw new Error('O nome não pode ficar vazio.');
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ username: value })
+    .eq('id', userId);
   if (error) throw error;
 }

@@ -35,7 +35,17 @@ export async function listRooms(): Promise<Room[]> {
 
 // Os ids das salas em que o usuário logado já está — para marcar "Minhas salas".
 export async function listMyRoomIds(): Promise<Set<string>> {
-  const { data, error } = await supabase.from('room_members').select('room_id');
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError) throw userError;
+  if (!user) return new Set();
+
+  const { data, error } = await supabase
+    .from('room_members')
+    .select('room_id')
+    .eq('user_id', user.id);
   if (error) throw error;
   return new Set((data as { room_id: string }[]).map((r) => r.room_id));
 }
